@@ -1,1 +1,308 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Разработка Telegram-ботов для малого бизнеса: запись клиентов, заявки и оплата, уведомления, сбор данных. От 7 000 ₽, от 3 дней.">
+<!-- METRIKA -->
+<title>Давид — Telegram-боты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #F2F5F7;
+  --surface: #FFFFFF;
+  --ink: #13202A;
+  --muted: #586977;
+  --line: #D9E1E7;
+  --accent: #1C7486;
+  --accent-ink: #FFFFFF;
+  --bubble-bot: #E6EEF2;
+  --bubble-me: #D3EEE6;
+  --f-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-body: "Golos Text", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0E151B; --surface: #16212A; --ink: #E4ECF1; --muted: #93A4B2; --line: #24333F;
+    --accent: #54B6C9; --accent-ink: #0B1318; --bubble-bot: #1D2A35; --bubble-me: #1B3A34;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+img { max-width: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 400 17px/1.6 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1080px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2rem, 5vw, 3.3rem); line-height: 1.1; font-weight: 700; }
+h2 { font-size: clamp(1.4rem, 3vw, 2rem); line-height: 1.2; font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 500; line-height: 1.3; }
+p { margin: 0; }
+a { color: var(--accent); }
+a:focus-visible, .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.label { font: 500 0.75rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+header.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 20px; flex-wrap: wrap; }
+.logo { font: 700 1rem var(--f-display); }
+.logo span { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; gap: 10px; background: var(--accent); color: var(--accent-ink); font: 600 1rem var(--f-body); text-decoration: none; padding: 14px 22px; border-radius: 12px; }
+.btn:hover { filter: brightness(1.08); }
+.btn.small { padding: 9px 16px; font-size: 0.92rem; border-radius: 10px; }
+.handle { font-family: var(--f-mono); font-size: 0.95rem; color: var(--muted); user-select: all; }
+.hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; padding-block: 40px 72px; }
+.hero > * { min-width: 0; }
+.hero-text { display: grid; gap: 22px; }
+.hero-text .lead { font-size: 1.15rem; color: var(--muted); max-width: 34em; }
+.cta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.facts { display: flex; gap: 28px; flex-wrap: wrap; padding-top: 8px; }
+.facts div { display: grid; gap: 4px; }
+.facts b { font: 700 1.3rem var(--f-display); font-variant-numeric: tabular-nums; }
+.facts span { font-size: 0.88rem; color: var(--muted); }
+.chat { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; box-shadow: 0 18px 50px -24px rgba(19, 32, 42, 0.35); }
+.chat-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font: 700 0.85rem var(--f-display); flex: none; }
+.chat-head b { display: block; font-size: 0.98rem; }
+.chat-head small { color: var(--muted); font-size: 0.8rem; }
+.chat-body { display: flex; flex-direction: column; gap: 10px; padding: 18px; min-height: 340px; }
+.msg { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 0.95rem; line-height: 1.45; }
+.msg.bot { background: var(--bubble-bot); border-bottom-left-radius: 4px; align-self: flex-start; }
+.msg.me { background: var(--bubble-me); border-bottom-right-radius: 4px; align-self: flex-end; }
+.msg time { display: block; text-align: right; font: 400 0.7rem var(--f-mono); color: var(--muted); margin-top: 4px; }
+.kb { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; align-self: flex-start; width: 85%; }
+.kb button { font: 500 0.88rem var(--f-mono); padding: 8px 4px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--accent); cursor: pointer; }
+.kb button:hover { border-color: var(--accent); }
+.kb button:disabled { opacity: 0.45; cursor: default; }
+.msg, .kb { animation: pop 0.35s ease both; }
+@keyframes pop { from { transform: translateY(6px); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .msg, .kb { animation: none; } }
+.chat-note { font-size: 0.8rem; color: var(--muted); padding: 0 18px 16px; }
+section { padding-block: 64px; border-top: 1px solid var(--line); }
+.sec-head { display: grid; gap: 10px; margin-bottom: 36px; max-width: 40em; }
+.sec-head p { color: var(--muted); }
+.kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px 40px; }
+.kinds > div { display: grid; gap: 8px; align-content: start; }
+.kinds p { color: var(--muted); font-size: 0.97rem; }
+.kinds .eg { font: 400 0.82rem var(--f-mono); color: var(--accent); }
+.case { display: grid; grid-template-columns: 220px 1fr; gap: 24px; padding-block: 24px; border-bottom: 1px solid var(--line); }
+.case:first-child { padding-top: 0; }
+.case > * { min-width: 0; }
+.case .tag { font: 500 0.8rem var(--f-mono); color: var(--muted); }
+.case .body { display: grid; gap: 8px; }
+.case .body p { color: var(--muted); }
+.stack { display: flex; gap: 6px; flex-wrap: wrap; }
+.stack span { font: 400 0.75rem var(--f-mono); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; color: var(--muted); }
+.prices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.price { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 26px; display: grid; gap: 14px; align-content: start; }
+.price.main { border: 2px solid var(--accent); }
+.price .amount { font: 700 1.7rem var(--f-display); font-variant-numeric: tabular-nums; }
+.price .term { font: 500 0.85rem var(--f-mono); color: var(--accent); }
+.price ul { margin: 0; padding-left: 1.1em; color: var(--muted); display: grid; gap: 6px; font-size: 0.95rem; }
+.price-note { margin-top: 20px; color: var(--muted); font-size: 0.92rem; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; gap: 8px; align-content: start; }
+.steps li::before { content: counter(s); font: 700 1rem var(--f-display); width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--accent); color: var(--accent); display: grid; place-items: center; }
+.steps b { font-weight: 600; }
+.steps p { color: var(--muted); font-size: 0.93rem; }
+.faq { max-width: 760px; }
+.faq details { border-bottom: 1px solid var(--line); padding-block: 16px; }
+.faq summary { cursor: pointer; font-weight: 600; font-size: 1.05rem; }
+.faq details p { color: var(--muted); padding-top: 10px; }
+.final { display: grid; gap: 20px; justify-items: start; }
+footer { padding-block: 32px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; }
+@media (max-width: 880px) {
+  .hero { grid-template-columns: 1fr; gap: 36px; padding-top: 16px; }
+  .kinds, .prices { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .case { grid-template-columns: 1fr; gap: 10px; }
+}
+@media (max-width: 480px) { .steps { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">Давид<span>.</span>боты</div>
+    <a class="btn small" href="https://t.me/PetrosDavid" target="_blank" rel="noopener">Написать в Telegram</a>
+  </header>
 
+  <div class="hero">
+    <div class="hero-text">
+      <span class="label">Разработка Telegram-ботов</span>
+      <h1>Бот, который принимает заявки, пока вы заняты делом</h1>
+      <p class="lead">Делаю Telegram-ботов для малого бизнеса и частных специалистов: запись клиентов, приём заявок и оплаты, уведомления, сбор данных. Пишу сам, без конструкторов, поэтому бот делает именно то, что нужно вам.</p>
+      <div class="cta-row">
+        <a class="btn" href="https://t.me/PetrosDavid" target="_blank" rel="noopener">Обсудить проект →</a>
+        <span class="handle">@PetrosDavid</span>
+      </div>
+      <div class="facts">
+        <div><b>от 3 дней</b><span>простой бот</span></div>
+        <div><b>50 / 50</b><span>предоплата и оплата после сдачи</span></div>
+        <div><b>14 дней</b><span>бесплатных правок</span></div>
+      </div>
+    </div>
+
+    <div class="chat" aria-label="Пример работы бота для записи">
+      <div class="chat-head">
+        <div class="avatar">BS</div>
+        <div><b>Барбершоп «Бритва»</b><small>бот · пример</small></div>
+      </div>
+      <div class="chat-body" id="chat">
+        <div class="msg me">Хочу записаться на стрижку в субботу<time>12:04</time></div>
+        <div class="msg bot">Суббота, 1 ноября. Свободное время у мастера Артёма:<time>12:04</time></div>
+        <div class="kb" id="slots">
+          <button type="button">11:00</button>
+          <button type="button">14:30</button>
+          <button type="button">17:00</button>
+        </div>
+      </div>
+      <p class="chat-note">Нажмите на время. Так клиент записывается сам, а вам приходит уведомление.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <span class="label">Что делаю</span>
+      <h2>Боты под конкретную задачу бизнеса</h2>
+    </div>
+    <div class="kinds">
+      <div><h3>Запись клиентов</h3><p>Свободные слоты, напоминания за день и за час, перенос и отмена без звонков.</p><span class="eg">салоны · клиники · репетиторы</span></div>
+      <div><h3>Заявки и оплата</h3><p>Бот задаёт вопросы, собирает заявку, принимает оплату и передаёт всё вам или в таблицу.</p><span class="eg">услуги · доставка · курсы</span></div>
+      <div><h3>Уведомления</h3><p>Новый заказ, оплата, ошибка на сайте или изменение цены — сообщение приходит сразу.</p><span class="eg">магазины · сервисы · команды</span></div>
+      <div><h3>Сбор данных</h3><p>Бот сам забирает данные с сайтов и сервисов по API и присылает сводку по расписанию.</p><span class="eg">цены конкурентов · отчёты</span></div>
+      <div><h3>ИИ-помощник</h3><p>Отвечает на типовые вопросы клиентов по вашим материалам и зовёт человека, когда нужно.</p><span class="eg">поддержка · FAQ</span></div>
+      <div><h3>Автоматизация рутины</h3><p>Связываю Telegram с таблицами, CRM и учётом, чтобы данные не переносить руками.</p><span class="eg">Google Таблицы · CRM</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="label">Портфолио</span>
+      <h2>Что уже сделано</h2>
+      <p>Мои собственные проекты по сбору и анализу данных. Они работают круглосуточно и сами отчитываются в Telegram.</p>
+    </div>
+    <div class="cases">
+      <div class="case">
+        <div class="tag">Уведомления</div>
+        <div class="body">
+          <h3>Два бота-оповещателя для разных систем</h3>
+          <p>Каждая система пишет журнал событий, а свой бот пересылает важные события в чат. Нет дублей, ничего не теряется после перезапуска.</p>
+          <div class="stack"><span>Python</span><span>Telegram Bot API</span><span>очередь сообщений</span></div>
+        </div>
+      </div>
+      <div class="case">
+        <div class="tag">ИИ-аналитика</div>
+        <div class="body">
+          <h3>Анализ новостей и данных с помощью ИИ</h3>
+          <p>Собирает новости и рыночные данные, отдаёт их языковой модели и получает понятный отчёт на русском. Отчёты сохраняются и сравниваются между собой.</p>
+          <div class="stack"><span>Python</span><span>LLM API</span><span>парсинг новостей</span></div>
+        </div>
+      </div>
+      <div class="case">
+        <div class="tag">Сбор данных</div>
+        <div class="body">
+          <h3>Данные Московской биржи и ежемесячные отчёты</h3>
+          <p>Автоматически скачивает историю по 35 инструментам Мосбиржи, считает показатели и раз в месяц формирует отчёт.</p>
+          <div class="stack"><span>Python</span><span>MOEX ISS API</span><span>JSON</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="label">Цены</span>
+      <h2>Сколько стоит бот</h2>
+      <p>Точную цену называю после короткого разговора о задаче. Ниже ориентиры.</p>
+    </div>
+    <div class="prices">
+      <div class="price">
+        <h3>Простой бот</h3>
+        <div class="amount">от 7 000 ₽</div>
+        <div class="term">3–5 дней</div>
+        <ul><li>меню и ответы на частые вопросы</li><li>форма заявки</li><li>заявки приходят вам в Telegram</li></ul>
+      </div>
+      <div class="price main">
+        <h3>Бот для бизнеса</h3>
+        <div class="amount">от 15 000 ₽</div>
+        <div class="term">7–10 дней</div>
+        <ul><li>запись или заказы</li><li>приём оплаты</li><li>выгрузка в Google Таблицы</li><li>напоминания клиентам</li></ul>
+      </div>
+      <div class="price">
+        <h3>Сложная автоматизация</h3>
+        <div class="amount">от 30 000 ₽</div>
+        <div class="term">от 2 недель</div>
+        <ul><li>интеграции с CRM и сервисами по API</li><li>ИИ-помощник</li><li>сбор данных и отчёты по расписанию</li></ul>
+      </div>
+    </div>
+    <p class="price-note">Размещение бота на сервере — от 300 ₽ в месяц, помогу настроить. Поддержка и доработки после запуска — от 2 000 ₽ в месяц, по желанию.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="label">Как работаем</span>
+      <h2>От сообщения до запуска</h2>
+    </div>
+    <ol class="steps">
+      <li><b>Пишете в Telegram</b><p>Пара предложений о задаче, этого достаточно.</p></li>
+      <li><b>Созваниваемся на 15 минут</b><p>Уточняю детали и называю цену и срок.</p></li>
+      <li><b>Предоплата 50%</b><p>Начинаю работу, присылаю промежуточные версии.</p></li>
+      <li><b>Тестируете бота</b><p>Проверяете на себе, вношу правки.</p></li>
+      <li><b>Запуск</b><p>Оплата оставшихся 50%, 14 дней бесплатных правок.</p></li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="label">Вопросы</span>
+      <h2>Частые вопросы</h2>
+    </div>
+    <div class="faq">
+      <details><summary>Нужен ли мне свой сервер?</summary><p>Боту нужно где-то работать круглосуточно. Обычно это недорогой сервер от 300 ₽ в месяц. Я помогу его выбрать и всё настрою, сервер будет оформлен на вас.</p></details>
+      <details><summary>Кому принадлежит бот и код?</summary><p>Вам. После оплаты передаю исходный код и доступы к боту.</p></details>
+      <details><summary>Можно доработать бота потом?</summary><p>Да. Код пишется так, чтобы его можно было расширять. Доработки оцениваю отдельно.</p></details>
+      <details><summary>Работаете официально?</summary><p>Да, как самозанятый. Выдаю чек из приложения «Мой налог», можно оплатить с карты или со счёта компании.</p></details>
+    </div>
+  </section>
+
+  <section class="final">
+    <h2>Расскажите о задаче — отвечу в течение дня</h2>
+    <div class="cta-row">
+      <a class="btn" href="https://t.me/PetrosDavid" target="_blank" rel="noopener">Написать в Telegram →</a>
+      <span class="handle">@PetrosDavid</span>
+    </div>
+  </section>
+
+  <footer>Давид, разработка Telegram-ботов · @PetrosDavid</footer>
+</div>
+
+<script>
+(function () {
+  var chat = document.getElementById('chat');
+  var slots = document.getElementById('slots');
+  function add(cls, html) {
+    var d = document.createElement('div');
+    d.className = 'msg ' + cls;
+    d.innerHTML = html;
+    chat.appendChild(d);
+  }
+  slots.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b || b.disabled) return;
+    var t = b.textContent;
+    slots.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+    add('me', t + '<time>12:05</time>');
+    setTimeout(function () {
+      add('bot', 'Готово! Вы записаны на субботу, ' + t + ', мастер Артём. Напомню за день и за 2 часа до визита.<time>12:05</time>');
+    }, 500);
+  });
+})();
+</script>
+</body>
+</html>
